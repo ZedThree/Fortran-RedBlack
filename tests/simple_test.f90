@@ -4,6 +4,7 @@ program simple_test
 
   block
     type(binary_tree_t) :: tree
+    integer, allocatable :: vals(:)
 
     call tree_add(tree, 4)
     call tree_add(tree, 5)
@@ -16,6 +17,13 @@ program simple_test
       print*, tree%root%left%val
       print*, tree%root%right%val
     end if
+
+    write(*, '(a)', advance='no') "print_tree: "
+    call print_tree(tree)
+
+    write(*, '(a)', advance='no') "get_values_tree: "
+    vals = get_values_tree(tree)
+    print*, vals
   end block
 
 end program simple_test

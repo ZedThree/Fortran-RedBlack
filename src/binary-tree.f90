@@ -11,6 +11,7 @@ module binary_tree
 
   type :: binary_tree_t
     type(node_t), pointer :: root => null()
+    integer :: size = 0
   contains
     final :: delete_tree
   end type binary_tree_t
@@ -27,6 +28,8 @@ contains
     else
       call tree_add_at_node(this%root, val)
     end if
+
+    this%size = this%size + 1
   end subroutine tree_add
 
   recursive subroutine tree_add_at_node(node, val)
@@ -112,6 +115,62 @@ contains
     end if
   end subroutine delete_node
 
-end module binary_tree
+  subroutine print_tree(this)
+    class(binary_tree_t), intent(in) :: this
 
-    
+    if (.not. associated(this%root)) then
+      return
+    end if
+
+    call print_node(this%root)
+    print*, ""
+  end subroutine print_tree
+
+  recursive subroutine print_node(node)
+    type(node_t), intent(in) :: node
+
+    if (associated(node%left)) then
+      call print_node(node%left)
+    end if
+
+    write(*, '(i0, a)', advance='no') node%val, " "
+
+    if (associated(node%right)) then
+      call print_node(node%right)
+    end if
+  end subroutine print_node
+
+  function get_values_tree(this) result(vals)
+    class(binary_tree_t), intent(in) :: this
+    integer, allocatable :: vals(:)
+
+    integer :: index
+
+    allocate(vals(this%size))
+
+    if (.not. associated(this%root)) then
+      return
+    end if
+
+    index = 0
+    call get_values_node(this%root, vals, index)
+  end function get_values_tree
+
+  recursive subroutine get_values_node(node, vals, index)
+    type(node_t), intent(in) :: node
+    integer, allocatable, intent(inout) :: vals(:)
+    integer, intent(inout) :: index
+
+    if (associated(node%left)) then
+      call get_values_node(node%left, vals, index)
+    end if
+
+    index = index + 1
+    vals(index) = node%val
+
+    if (associated(node%right)) then
+      call get_values_node(node%right, vals, index)
+    end if
+  end subroutine get_values_node
+
+end module binary_tree

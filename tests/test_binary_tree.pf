@@ -13,6 +13,8 @@ contains
 
     @assertTrue(associated(tree%root))
     @assertEqual(4, tree%root%val)
+
+    @assertEqual(1, tree%size)
   end subroutine test_add_node
 
   @test
@@ -28,6 +30,7 @@ contains
     @assertEqual(4, tree%root%val)
     @assertEqual(3, tree%root%left%val)
 
+    @assertEqual(2, tree%size)
   end subroutine test_add_two_nodes_left
 
   @test
@@ -43,6 +46,7 @@ contains
     @assertEqual(4, tree%root%val)
     @assertEqual(5, tree%root%right%val)
 
+    @assertEqual(2, tree%size)
   end subroutine test_add_two_nodes_right
 
   @test
@@ -61,6 +65,7 @@ contains
     @assertEqual(3, tree%root%left%val)
     @assertEqual(5, tree%root%right%val)
 
+    @assertEqual(3, tree%size)
   end subroutine test_add_three_nodes
 
   @test
@@ -91,6 +96,7 @@ contains
     @assertEqual(10, tree%root%right%right%val)
     @assertEqual(7, tree%root%right%right%left%val)
 
+    @assertEqual(7, tree%size)
   end subroutine test_add_five_nodes
 
   @test
@@ -114,5 +120,25 @@ contains
 
     @assertFalse(associated(found))
   end subroutine test_find
+
+  @test
+  subroutine test_get_values()
+    type(binary_tree_t) :: tree
+    integer, allocatable :: vals(:)
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 3)
+    call tree_add(tree, 5)
+    call tree_add(tree, 0)
+    call tree_add(tree, 1)
+    call tree_add(tree, 10)
+    call tree_add(tree, 7)
+
+    vals = get_values_tree(tree)
+
+    @assertEqual(7, size(vals))
+    @assertEqual([0, 1, 3, 4, 5, 7, 10], vals)
+
+  end subroutine test_get_values
 
 end module test_binary_tree
