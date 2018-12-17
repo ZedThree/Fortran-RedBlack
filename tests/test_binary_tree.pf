@@ -1,0 +1,118 @@
+module test_binary_tree
+  use binary_tree
+  use pfunit_mod
+  implicit none
+
+contains
+
+  @test
+  subroutine test_add_node()
+    type(binary_tree_t) :: tree
+
+    call tree_add(tree, 4)
+
+    @assertTrue(associated(tree%root))
+    @assertEqual(4, tree%root%val)
+  end subroutine test_add_node
+
+  @test
+  subroutine test_add_two_nodes_left()
+    type(binary_tree_t) :: tree
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 3)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+
+    @assertEqual(4, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+
+  end subroutine test_add_two_nodes_left
+
+  @test
+  subroutine test_add_two_nodes_right()
+    type(binary_tree_t) :: tree
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 5)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%right))
+
+    @assertEqual(4, tree%root%val)
+    @assertEqual(5, tree%root%right%val)
+
+  end subroutine test_add_two_nodes_right
+
+  @test
+  subroutine test_add_three_nodes()
+    type(binary_tree_t) :: tree
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 3)
+    call tree_add(tree, 5)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+    @assertTrue(associated(tree%root%right))
+
+    @assertEqual(4, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+    @assertEqual(5, tree%root%right%val)
+
+  end subroutine test_add_three_nodes
+
+  @test
+  subroutine test_add_five_nodes()
+    type(binary_tree_t) :: tree
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 3)
+    call tree_add(tree, 5)
+    call tree_add(tree, 0)
+    call tree_add(tree, 1)
+    call tree_add(tree, 10)
+    call tree_add(tree, 7)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+    @assertTrue(associated(tree%root%left%left))
+    @assertTrue(associated(tree%root%left%left%right))
+    @assertTrue(associated(tree%root%right))
+    @assertTrue(associated(tree%root%right%right))
+    @assertTrue(associated(tree%root%right%right%left))
+
+    @assertEqual(4, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+    @assertEqual(0, tree%root%left%left%val)
+    @assertEqual(1, tree%root%left%left%right%val)
+    @assertEqual(5, tree%root%right%val)
+    @assertEqual(10, tree%root%right%right%val)
+    @assertEqual(7, tree%root%right%right%left%val)
+
+  end subroutine test_add_five_nodes
+
+  @test
+  subroutine test_find()
+    type(binary_tree_t) :: tree
+    type(node_t), pointer :: found
+
+    call tree_add(tree, 4)
+    call tree_add(tree, 3)
+    call tree_add(tree, 5)
+    call tree_add(tree, 0)
+    call tree_add(tree, 1)
+    call tree_add(tree, 10)
+    call tree_add(tree, 7)
+
+    found => find(tree, 5)
+
+    @assertTrue(associated(found))
+
+    found => find(tree, 8)
+
+    @assertFalse(associated(found))
+  end subroutine test_find
+
+end module test_binary_tree

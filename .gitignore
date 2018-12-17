@@ -45,3 +45,4 @@ CTestTestfile.cmake
 
 externals/build_pfunit
 externals/install_pfunit
+build
