@@ -23,11 +23,11 @@ contains
       allocate(this%root)
       this%root%val = val
     else
-      call tree_add_at_node(this, this%root, val)
+      call tree_add_at_node(this%root, val)
     end if
   end subroutine tree_add
 
-  subroutine tree_add_at_node(node, val)
+  recursive subroutine tree_add_at_node(node, val)
     class(node_t), intent(inout) :: node
     integer, intent(in) :: val
 
@@ -51,7 +51,9 @@ contains
   function find(this, val)
     class(binary_tree_t), intent(in) :: this
     integer, intent(in) :: val
-    type(node_t), pointer :: find => null()
+    type(node_t), pointer :: find
+
+    find => null()
 
     if (.not. associated(this%root)) then
       return
@@ -60,10 +62,12 @@ contains
     find => find_at_node(this%root, val)
   end function find
 
-  function find_at_node(node, val) result(found)
-    class(node_t), intent(in) :: node
+  recursive function find_at_node(node, val) result(found)
+    type(node_t), pointer :: node
     integer, intent(in) :: val
-    type(node_t), pointer :: found => null()
+    type(node_t), pointer :: found
+
+    found => null()
 
     if (val == node%val) then
       found => node
@@ -83,7 +87,7 @@ contains
   end function find_at_node
 
   subroutine delete_tree(this)
-    class(binary_tree_t), intent(inout) :: this
+    type(binary_tree_t), intent(inout) :: this
 
     if (associated(this%root)) then
       call delete_node(this%root)
@@ -92,8 +96,8 @@ contains
 
   end subroutine delete_tree
 
-  subroutine delete_node(node)
-    class(node_t), intent(inout) :: node
+  recursive subroutine delete_node(node)
+    type(node_t), intent(inout) :: node
 
     if (associated(node%left)) then
       call delete_node(node%left)
