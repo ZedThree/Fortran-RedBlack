@@ -10,7 +10,9 @@ module binary_tree
   end type node_t
 
   type :: binary_tree_t
-    type(node), pointer :: root => null()
+    type(node_t), pointer :: root => null()
+  contains
+    final :: delete_tree
   end type binary_tree_t
 
 contains
