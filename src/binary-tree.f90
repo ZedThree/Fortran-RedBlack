@@ -173,4 +173,101 @@ contains
     end if
   end subroutine get_values_node
 
+  recursive function node_min_value(node) result(min)
+    type(node_t), intent(in) :: node
+    integer :: min
+
+    if (.not. associated(node%left)) then
+      min = node%val
+    else
+      min = node_min_value(node%left)
+    end if
+  end function node_min_value
+
+  function tree_remove(this, val) result(removed)
+    class(binary_tree_t), intent(inout) :: this
+    integer, intent(in) :: val
+    logical :: removed
+
+    type(node_t), pointer :: removed_node => null()
+
+    if (.not. associated(this%root)) then
+      removed = .false.
+      return
+    end if
+
+    if (this%root%val == val) then
+      block
+        type(node_t), target :: dummy_root
+        type(node_t), pointer :: dummy_root_p
+
+        dummy_root_p => dummy_root
+        dummy_root_p%left => this%root
+        dummy_root_p%right => null()
+        removed_node => node_remove(this%root, dummy_root_p, val)
+
+        this%root => dummy_root_p%left
+      end block
+    else
+      removed_node => node_remove(this%root, null(), val)
+    end if
+
+    if (associated(removed_node)) then
+      deallocate(removed_node)
+      removed_node => null()
+      removed = .true.
+      this%size = this%size - 1
+    else
+      removed = .false.
+    end if
+
+  end function tree_remove
+
+  recursive function node_remove(this, parent, val) &
+       & result(removed_node)
+    type(node_t), pointer :: this
+    type(node_t), pointer :: parent
+    integer :: val
+
+    type(node_t), pointer :: removed_node
+
+    removed_node => null()
+
+    if (val < this%val) then
+      if (.not. associated(this%left)) then
+        return
+      end if
+      removed_node => node_remove(this%left, this, val)
+    else if (val > this%val) then
+      if (.not. associated(this%right)) then
+        return
+      end if
+      removed_node => node_remove(this%right, this, val)
+    else
+      if (associated(this%left) .and. associated(this%right)) then
+        this%val = node_min_value(this%right)
+        removed_node => node_remove(this%right, this, this%val)
+      else if (associated(parent%left, target=this)) then
+
+        removed_node => this
+
+        if (associated(this%left)) then
+          parent%left => this%left
+        else
+          parent%left => this%right
+        end if
+      else if (associated(parent%right, target=this)) then
+
+        removed_node => this
+
+        if (associated(this%left)) then
+          parent%right => this%left
+        else
+          parent%right => this%right
+        end if
+      end if
+    end if
+
+  end function node_remove
+
 end module binary_tree
