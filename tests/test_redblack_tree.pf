@@ -6,6 +6,127 @@ module test_redblack_tree
 contains
 
   @test
+  subroutine test_single_rotation_left()
+    type(redblack_node_t), pointer :: a, b, c, d, e
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    b%left => a
+    b%right => c
+    c%right => d
+
+    e => single_rotation(b, is_left=.true.)
+
+    @assertTrue(associated(e))
+    @assertTrue(associated(e%left))
+    @assertTrue(associated(e%left%left))
+    @assertTrue(associated(e%right))
+
+    @assertEqual(2, e%val)
+    @assertEqual(1, e%left%val)
+    @assertEqual(0, e%left%left%val)
+    @assertEqual(3, e%right%val)
+
+    deallocate(a, b, c, d)
+
+  end subroutine test_single_rotation_left
+
+  @test
+  subroutine test_single_rotation_right()
+    type(redblack_node_t), pointer :: a, b, c, d, e
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    c%left => b
+    b%left => a
+    c%right => d
+
+    e => single_rotation(c, is_left=.false.)
+
+    @assertTrue(associated(e))
+    @assertTrue(associated(e%left))
+    @assertTrue(associated(e%right))
+    @assertTrue(associated(e%right%right))
+
+    @assertEqual(1, e%val)
+    @assertEqual(0, e%left%val)
+    @assertEqual(2, e%right%val)
+    @assertEqual(3, e%right%right%val)
+
+    deallocate(a, b, c, d)
+
+  end subroutine test_single_rotation_right
+
+  @test
+  subroutine test_double_rotation_left()
+    type(redblack_node_t), pointer :: a, b, c, d, e
+
+    e => null()
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    b%left => a
+    b%right => d
+    d%left => c
+
+    e => double_rotation(b, is_left=.true.)
+
+    @assertTrue(associated(e))
+    @assertTrue(associated(e%left))
+    @assertTrue(associated(e%left%left))
+    @assertTrue(associated(e%right))
+
+    @assertEqual(2, e%val)
+    @assertEqual(1, e%left%val)
+    @assertEqual(0, e%left%left%val)
+    @assertEqual(3, e%right%val)
+
+    deallocate(a, b, c, d)
+
+  end subroutine test_double_rotation_left
+
+  @test
+  subroutine test_double_rotation_right()
+    type(redblack_node_t), pointer :: a, b, c, d, e
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    c%left => a
+    a%right => b
+    c%right => d
+
+    e => double_rotation(c, is_left=.false.)
+
+    @assertTrue(associated(e))
+    @assertTrue(associated(e%left))
+    @assertTrue(associated(e%right))
+    @assertTrue(associated(e%right%right))
+
+    @assertEqual(1, e%val)
+    @assertEqual(0, e%left%val)
+    @assertEqual(2, e%right%val)
+    @assertEqual(3, e%right%right%val)
+
+    deallocate(a, b, c, d)
+
+  end subroutine test_double_rotation_right
+
+  @test
   subroutine test_add_node()
     type(redblack_tree_t) :: tree
 
@@ -73,7 +194,7 @@ contains
   end subroutine test_add_three_nodes
 
   @test
-  subroutine test_add_five_nodes()
+  subroutine test_add_six_nodes()
     type(redblack_tree_t) :: tree
 
     call tree_add(tree, 5)
@@ -102,7 +223,28 @@ contains
 
     @assertEqual(7, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
-  end subroutine test_add_five_nodes
+  end subroutine test_add_six_nodes
+
+  @test
+  subroutine test_add_in_order()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 0)
+    call tree_add(tree, 1)
+    call tree_add(tree, 2)
+    call tree_add(tree, 3)
+    call tree_add(tree, 4)
+    call tree_add(tree, 5)
+    call tree_add(tree, 6)
+    call tree_add(tree, 7)
+    call tree_add(tree, 8)
+    call tree_add(tree, 9)
+    call tree_add(tree, 10)
+    call tree_add(tree, 11)
+
+    @assertEqual(12, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_in_order
 
   @test
   subroutine test_find()

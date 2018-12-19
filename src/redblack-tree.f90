@@ -5,7 +5,7 @@ module redblack_tree
   type :: redblack_node_t
     type(redblack_node_t), pointer :: left => null()
     type(redblack_node_t), pointer :: right => null()
-    logical :: red
+    logical :: red = .true.
 
     integer :: val
   end type redblack_node_t
@@ -55,8 +55,10 @@ contains
     if (is_left) then
       root%right => single_rotation(root%right, .false.)
     else
-      root%left => single_rotation(root%left, .false.)
+      root%left => single_rotation(root%left, .true.)
     end if
+
+    old => single_rotation(root, is_left)
 
   end function double_rotation
 
