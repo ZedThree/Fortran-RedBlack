@@ -6,7 +6,7 @@ module test_redblack_tree
 contains
 
   @test
-  subroutine test_single_rotation_left()
+  subroutine test_single_rotate_left()
     type(redblack_node_t), pointer :: a, b, c, d, e
 
     allocate(a, b, c, d)
@@ -19,7 +19,7 @@ contains
     b%right => c
     c%right => d
 
-    e => single_rotation(b, is_left=.true.)
+    e => single_rotate(b, is_left=.true.)
 
     @assertTrue(associated(e))
     @assertTrue(associated(e%left))
@@ -33,10 +33,10 @@ contains
 
     deallocate(a, b, c, d)
 
-  end subroutine test_single_rotation_left
+  end subroutine test_single_rotate_left
 
   @test
-  subroutine test_single_rotation_right()
+  subroutine test_single_rotate_right()
     type(redblack_node_t), pointer :: a, b, c, d, e
 
     allocate(a, b, c, d)
@@ -49,7 +49,7 @@ contains
     b%left => a
     c%right => d
 
-    e => single_rotation(c, is_left=.false.)
+    e => single_rotate(c, is_left=.false.)
 
     @assertTrue(associated(e))
     @assertTrue(associated(e%left))
@@ -63,10 +63,10 @@ contains
 
     deallocate(a, b, c, d)
 
-  end subroutine test_single_rotation_right
+  end subroutine test_single_rotate_right
 
   @test
-  subroutine test_double_rotation_left()
+  subroutine test_double_rotate_left()
     type(redblack_node_t), pointer :: a, b, c, d, e
 
     e => null()
@@ -80,7 +80,7 @@ contains
     b%right => d
     d%left => c
 
-    e => double_rotation(b, is_left=.true.)
+    e => double_rotate(b, is_left=.true.)
 
     @assertTrue(associated(e))
     @assertTrue(associated(e%left))
@@ -94,10 +94,10 @@ contains
 
     deallocate(a, b, c, d)
 
-  end subroutine test_double_rotation_left
+  end subroutine test_double_rotate_left
 
   @test
-  subroutine test_double_rotation_right()
+  subroutine test_double_rotate_right()
     type(redblack_node_t), pointer :: a, b, c, d, e
 
     allocate(a, b, c, d)
@@ -110,7 +110,7 @@ contains
     a%right => b
     c%right => d
 
-    e => double_rotation(c, is_left=.false.)
+    e => double_rotate(c, is_left=.false.)
 
     @assertTrue(associated(e))
     @assertTrue(associated(e%left))
@@ -124,7 +124,7 @@ contains
 
     deallocate(a, b, c, d)
 
-  end subroutine test_double_rotation_right
+  end subroutine test_double_rotate_right
 
   @test
   subroutine test_add_node()

@@ -27,7 +27,7 @@ contains
     if (associated(root)) is_red = root%red
   end function is_red
 
-  function single_rotation(root, is_left) result(old)
+  function single_rotate(root, is_left) result(old)
     type(redblack_node_t), pointer :: root
     logical, intent(in) :: is_left
     type(redblack_node_t), pointer :: old
@@ -45,22 +45,22 @@ contains
     root%red = .true.
     old%red = .false.
 
-  end function single_rotation
+  end function single_rotate
 
-  function double_rotation(root, is_left) result(old)
+  function double_rotate(root, is_left) result(old)
     type(redblack_node_t), pointer :: root
     logical, intent(in) :: is_left
     type(redblack_node_t), pointer :: old
 
     if (is_left) then
-      root%right => single_rotation(root%right, .false.)
+      root%right => single_rotate(root%right, .false.)
     else
-      root%left => single_rotation(root%left, .true.)
+      root%left => single_rotate(root%left, .true.)
     end if
 
-    old => single_rotation(root, is_left)
+    old => single_rotate(root, is_left)
 
-  end function double_rotation
+  end function double_rotate
 
   recursive function redblack_assert(root) result(black_count)
     type(redblack_node_t), pointer :: root
@@ -162,15 +162,15 @@ contains
       else
         if (val < node%val) then
           if (is_red(node_dir%left)) then
-            node => single_rotation(node, is_left=.false.)
+            node => single_rotate(node, is_left=.false.)
           else if (is_red(node_dir%right)) then
-            node => single_rotation(node, is_left=.false.)
+            node => single_rotate(node, is_left=.false.)
           end if
         else
           if (is_red(node_dir%right)) then
-            node => single_rotation(node, is_left=.true.)
+            node => single_rotate(node, is_left=.true.)
           else if (is_red(node_dir%right)) then
-            node => double_rotation(node, is_left=.true.)
+            node => double_rotate(node, is_left=.true.)
           end if
         end if
       end if
