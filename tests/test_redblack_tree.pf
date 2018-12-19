@@ -1,0 +1,330 @@
+module test_redblack_tree
+  use redblack_tree
+  use pfunit_mod
+  implicit none
+
+contains
+
+  @test
+  subroutine test_add_node()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 5)
+
+    @assertTrue(associated(tree%root))
+    @assertEqual(5, tree%root%val)
+
+    @assertEqual(1, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_node
+
+  @test
+  subroutine test_add_two_nodes_left()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+
+    @assertEqual(5, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+
+    @assertEqual(2, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_two_nodes_left
+
+  @test
+  subroutine test_add_two_nodes_right()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 7)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%right))
+
+    @assertEqual(5, tree%root%val)
+    @assertEqual(7, tree%root%right%val)
+
+    @assertEqual(2, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_two_nodes_right
+
+  @test
+  subroutine test_add_three_nodes()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+    @assertTrue(associated(tree%root%right))
+
+    @assertEqual(5, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+    @assertEqual(7, tree%root%right%val)
+
+    @assertEqual(3, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_three_nodes
+
+  @test
+  subroutine test_add_five_nodes()
+    type(redblack_tree_t) :: tree
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    @assertTrue(associated(tree%root))
+    @assertTrue(associated(tree%root%left))
+    @assertTrue(associated(tree%root%left%left))
+    @assertTrue(associated(tree%root%left%right))
+    @assertTrue(associated(tree%root%right))
+    @assertTrue(associated(tree%root%right%left))
+    @assertTrue(associated(tree%root%right%right))
+
+    @assertEqual(5, tree%root%val)
+    @assertEqual(3, tree%root%left%val)
+    @assertEqual(2, tree%root%left%left%val)
+    @assertEqual(4, tree%root%left%right%val)
+    @assertEqual(7, tree%root%right%val)
+    @assertEqual(6, tree%root%right%left%val)
+    @assertEqual(8, tree%root%right%right%val)
+
+    @assertEqual(7, tree%size)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+  end subroutine test_add_five_nodes
+
+  @test
+  subroutine test_find()
+    type(redblack_tree_t) :: tree
+    type(redblack_node_t), pointer :: found
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    found => find(tree, 5)
+
+    @assertTrue(associated(found))
+
+    found => find(tree, 1)
+
+    @assertFalse(associated(found))
+  end subroutine test_find
+
+  @test
+  subroutine test_get_values()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    vals = get_values_tree(tree)
+
+    @assertEqual(7, size(vals))
+    @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
+
+  end subroutine test_get_values
+
+  @test
+  subroutine test_remove_root()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 5)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(6, size(vals))
+    @assertEqual([2, 3, 4, 6, 7, 8], vals)
+
+  end subroutine test_remove_root
+
+  @test
+  subroutine test_remove_left_value()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 2)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(6, size(vals))
+    @assertEqual([3, 4, 5, 6, 7, 8], vals)
+
+  end subroutine test_remove_left_value
+
+  @test
+  subroutine test_remove_right_value()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 8)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(6, size(vals))
+    @assertEqual([2, 3, 4, 5, 6, 7], vals)
+
+  end subroutine test_remove_right_value
+
+  @test
+  subroutine test_remove_middle_value()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 3)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(6, size(vals))
+    @assertEqual([2, 4, 5, 6, 7, 8], vals)
+
+  end subroutine test_remove_middle_value
+
+  @test
+  subroutine test_remove_multiple_values()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 3)
+    @assertTrue(removed)
+
+    removed = tree_remove(tree, 7)
+    @assertTrue(removed)
+
+    vals = get_values_tree(tree)
+
+    @assertEqual(5, size(vals))
+    @assertEqual([2, 4, 5, 6, 8], vals)
+
+  end subroutine test_remove_multiple_values
+
+  @test
+  subroutine test_remove_no_value()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+    call tree_add(tree, 2)
+    call tree_add(tree, 4)
+    call tree_add(tree, 6)
+    call tree_add(tree, 8)
+
+    removed = tree_remove(tree, 0)
+
+    vals = get_values_tree(tree)
+
+    @assertFalse(removed)
+    @assertEqual(7, size(vals))
+    @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
+
+  end subroutine test_remove_no_value
+
+  @test
+  subroutine test_remove_empty_tree()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    removed = tree_remove(tree, 6)
+    @assertFalse(removed)
+
+    vals = get_values_tree(tree)
+
+    @assertEqual(0, size(vals))
+    @assertEqual([integer::], vals)
+
+  end subroutine test_remove_empty_tree
+
+  @test
+  subroutine test_remove_last_value()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+
+    removed = tree_remove(tree, 5)
+    @assertTrue(removed)
+
+    vals = get_values_tree(tree)
+
+    @assertEqual(0, size(vals))
+    @assertEqual([integer::], vals)
+
+  end subroutine test_remove_last_value
+
+end module test_redblack_tree

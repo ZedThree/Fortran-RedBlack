@@ -12,7 +12,9 @@ project(FortranRBTree VERSION 0.1
 
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g")
 
-add_library(rbtree SHARED src/binary-tree.f90)
+add_library(rbtree SHARED
+  src/binary-tree.f90
+  src/redblack-tree.f90)
 
 add_executable(simple_test tests/simple_test.f90)
 target_link_libraries(simple_test PUBLIC rbtree)
@@ -23,6 +25,7 @@ include(CTest)
 enable_testing()
 set(TEST_SOURCES
   tests/test_binary_tree.pf
+  tests/test_redblack_tree.pf
   )
 
 include(cmake/FindpFUnit.cmake)
