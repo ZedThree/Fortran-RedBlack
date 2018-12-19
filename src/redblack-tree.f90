@@ -265,6 +265,44 @@ contains
     end if
   end subroutine print_node
 
+  subroutine pretty_print_tree(this)
+    class(redblack_tree_t), intent(in) :: this
+
+    if (.not. associated(this%root)) then
+      return
+    end if
+
+    call pretty_print_node(this%root, 1)
+  end subroutine pretty_print_tree
+
+  recursive subroutine pretty_print_node(node, depth)
+    type(redblack_node_t), intent(in) :: node
+    integer, intent(in) :: depth
+
+    character(len=5) :: red_or_black
+    character(len=22) :: depth_format
+
+    if (associated(node%right)) then
+      call pretty_print_node(node%right, depth + 1)
+    end if
+
+    if (node%red) then
+      red_or_black = "red"
+    else
+      red_or_black = "black"
+    end if
+
+    write(depth_format, '(a, i0, a)') "(", depth,&
+         & '("  "), i0, a, a, a)'
+
+    write(*, trim(depth_format)) node%val, " (", trim(red_or_black), ") "
+
+    if (associated(node%left)) then
+      call pretty_print_node(node%left, depth + 1)
+    end if
+
+  end subroutine pretty_print_node
+
   function get_values_tree(this) result(vals)
     class(redblack_tree_t), intent(in) :: this
     integer, allocatable :: vals(:)
