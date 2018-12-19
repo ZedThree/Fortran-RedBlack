@@ -336,17 +336,6 @@ contains
     end if
   end subroutine get_values_node
 
-  recursive function node_min_value(node) result(min)
-    type(redblack_node_t), intent(in) :: node
-    integer :: min
-
-    if (.not. associated(node%left)) then
-      min = node%val
-    else
-      min = node_min_value(node%left)
-    end if
-  end function node_min_value
-
   function tree_remove(this, val) result(removed)
     class(redblack_tree_t), intent(inout) :: this
     integer, intent(in) :: val
