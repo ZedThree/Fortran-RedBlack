@@ -15,6 +15,7 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g")
 add_library(rbtree SHARED
   src/binary-tree.f90
   src/redblack-tree.f90)
+target_compile_options(rbtree PRIVATE -Wall -Wextra)
 
 add_executable(simple_test tests/simple_test.f90)
 target_link_libraries(simple_test PUBLIC rbtree)
