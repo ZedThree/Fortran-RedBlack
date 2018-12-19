@@ -1,10 +1,13 @@
-program simple_test
+program simple_test_binary_tree
   use binary_tree
   implicit none
 
   block
     type(binary_tree_t) :: tree
     integer, allocatable :: vals(:)
+
+    print*, "--------------------"
+    print*, " Binary tree"
 
     call tree_add(tree, 4)
     call tree_add(tree, 5)
@@ -26,4 +29,4 @@ program simple_test
     print*, vals
   end block
 
-end program simple_test
+end program simple_test_binary_tree

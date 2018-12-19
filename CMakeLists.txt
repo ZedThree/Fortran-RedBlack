@@ -17,9 +17,17 @@ add_library(rbtree SHARED
   src/redblack-tree.f90)
 target_compile_options(rbtree PRIVATE -Wall -Wextra)
 
-add_executable(simple_test tests/simple_test.f90)
-target_link_libraries(simple_test PUBLIC rbtree)
-target_include_directories(simple_test PUBLIC $<TARGET_PROPERTY:rbtree,Fortran_MODULE_DIRECTORY>)
+add_executable(simple_test_binary_tree
+  tests/simple_test_binary_tree.f90)
+target_link_libraries(simple_test_binary_tree PUBLIC rbtree)
+target_include_directories(simple_test_binary_tree
+  PUBLIC $<TARGET_PROPERTY:rbtree,Fortran_MODULE_DIRECTORY>)
+
+add_executable(simple_test_redblack_tree
+  tests/simple_test_redblack_tree.f90)
+target_link_libraries(simple_test_redblack_tree PUBLIC rbtree)
+target_include_directories(simple_test_redblack_tree
+  PUBLIC $<TARGET_PROPERTY:rbtree,Fortran_MODULE_DIRECTORY>)
 
 include(CTest)
 
