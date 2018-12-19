@@ -102,7 +102,7 @@ contains
   @test
   subroutine test_find()
     type(binary_tree_t) :: tree
-    type(node_t), pointer :: found
+    type(binary_node_t), pointer :: found
 
     call tree_add(tree, 5)
     call tree_add(tree, 3)

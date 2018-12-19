@@ -2,15 +2,15 @@ module binary_tree
 
   implicit none
 
-  type :: node_t
-    type(node_t), pointer :: left => null()
-    type(node_t), pointer :: right => null()
+  type :: binary_node_t
+    type(binary_node_t), pointer :: left => null()
+    type(binary_node_t), pointer :: right => null()
 
     integer :: val
-  end type node_t
+  end type binary_node_t
 
   type :: binary_tree_t
-    type(node_t), pointer :: root => null()
+    type(binary_node_t), pointer :: root => null()
     integer :: size = 0
   contains
     final :: delete_tree
@@ -33,7 +33,7 @@ contains
   end subroutine tree_add
 
   recursive subroutine tree_add_at_node(node, val)
-    class(node_t), intent(inout) :: node
+    class(binary_node_t), intent(inout) :: node
     integer, intent(in) :: val
 
     if (val < node%val) then
@@ -56,7 +56,7 @@ contains
   function find(this, val)
     class(binary_tree_t), intent(in) :: this
     integer, intent(in) :: val
-    type(node_t), pointer :: find
+    type(binary_node_t), pointer :: find
 
     find => null()
 
@@ -68,9 +68,9 @@ contains
   end function find
 
   recursive function find_at_node(node, val) result(found)
-    type(node_t), pointer :: node
+    type(binary_node_t), pointer :: node
     integer, intent(in) :: val
-    type(node_t), pointer :: found
+    type(binary_node_t), pointer :: found
 
     found => null()
 
@@ -102,7 +102,7 @@ contains
   end subroutine delete_tree
 
   recursive subroutine delete_node(node)
-    type(node_t), intent(inout) :: node
+    type(binary_node_t), intent(inout) :: node
 
     if (associated(node%left)) then
       call delete_node(node%left)
@@ -127,7 +127,7 @@ contains
   end subroutine print_tree
 
   recursive subroutine print_node(node)
-    type(node_t), intent(in) :: node
+    type(binary_node_t), intent(in) :: node
 
     if (associated(node%left)) then
       call print_node(node%left)
@@ -157,7 +157,7 @@ contains
   end function get_values_tree
 
   recursive subroutine get_values_node(node, vals, index)
-    type(node_t), intent(in) :: node
+    type(binary_node_t), intent(in) :: node
     integer, allocatable, intent(inout) :: vals(:)
     integer, intent(inout) :: index
 
@@ -174,7 +174,7 @@ contains
   end subroutine get_values_node
 
   recursive function node_min_value(node) result(min)
-    type(node_t), intent(in) :: node
+    type(binary_node_t), intent(in) :: node
     integer :: min
 
     if (.not. associated(node%left)) then
@@ -189,7 +189,7 @@ contains
     integer, intent(in) :: val
     logical :: removed
 
-    type(node_t), pointer :: removed_node => null()
+    type(binary_node_t), pointer :: removed_node => null()
 
     if (.not. associated(this%root)) then
       removed = .false.
@@ -198,8 +198,8 @@ contains
 
     if (this%root%val == val) then
       block
-        type(node_t), target :: dummy_root
-        type(node_t), pointer :: dummy_root_p
+        type(binary_node_t), target :: dummy_root
+        type(binary_node_t), pointer :: dummy_root_p
 
         dummy_root_p => dummy_root
         dummy_root_p%left => this%root
@@ -225,11 +225,11 @@ contains
 
   recursive function node_remove(this, parent, val) &
        & result(removed_node)
-    type(node_t), pointer :: this
-    type(node_t), pointer :: parent
+    type(binary_node_t), pointer :: this
+    type(binary_node_t), pointer :: parent
     integer :: val
 
-    type(node_t), pointer :: removed_node
+    type(binary_node_t), pointer :: removed_node
 
     removed_node => null()
 
