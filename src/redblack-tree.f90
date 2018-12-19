@@ -340,29 +340,19 @@ contains
     class(redblack_tree_t), intent(inout) :: this
     integer, intent(in) :: val
     logical :: removed
+    logical :: done
 
     type(redblack_node_t), pointer :: removed_node => null()
+
+    integer :: data
 
     if (.not. associated(this%root)) then
       removed = .false.
       return
     end if
 
-    if (this%root%val == val) then
-      block
-        type(redblack_node_t), target :: dummy_root
-        type(redblack_node_t), pointer :: dummy_root_p
-
-        dummy_root_p => dummy_root
-        dummy_root_p%left => this%root
-        dummy_root_p%right => null()
-        removed_node => node_remove(this%root, dummy_root_p, val)
-
-        this%root => dummy_root_p%left
-      end block
-    else
-      removed_node => node_remove(this%root, null(), val)
-    end if
+    data = val
+    this%root => node_remove(this%root, removed_node, data, done)
 
     if (associated(removed_node)) then
       deallocate(removed_node)
@@ -375,51 +365,169 @@ contains
 
   end function tree_remove
 
-  recursive function node_remove(this, parent, val) &
-       & result(removed_node)
-    type(redblack_node_t), pointer :: this
-    type(redblack_node_t), pointer :: parent
-    integer :: val
+  recursive function node_remove(root, removed_node, val, done) &
+       & result(new_root)
+    type(redblack_node_t), pointer :: root, new_root
+    integer, intent(inout) :: val
+    logical, intent(inout) :: done
 
     type(redblack_node_t), pointer :: removed_node
+    type(redblack_node_t), pointer :: heir
+    logical :: is_left
 
     removed_node => null()
 
-    if (val < this%val) then
-      if (.not. associated(this%left)) then
-        return
-      end if
-      removed_node => node_remove(this%left, this, val)
-    else if (val > this%val) then
-      if (.not. associated(this%right)) then
-        return
-      end if
-      removed_node => node_remove(this%right, this, val)
-    else
-      if (associated(this%left) .and. associated(this%right)) then
-        this%val = node_min_value(this%right)
-        removed_node => node_remove(this%right, this, this%val)
-      else if (associated(parent%left, target=this)) then
+    if (.not. associated(root)) then
+      done = .true.
+      new_root => root
+      return
+    end if
 
-        removed_node => this
-
-        if (associated(this%left)) then
-          parent%left => this%left
+    if (root%val == val) then
+      if (.not. associated(root%left) &
+          .or. .not. associated(root%right)) then
+        if (associated(root%left)) then
+          new_root => root%left
         else
-          parent%left => this%right
+          new_root => root%right
         end if
-      else if (associated(parent%right, target=this)) then
 
-        removed_node => this
-
-        if (associated(this%left)) then
-          parent%right => this%left
-        else
-          parent%right => this%right
+        if (is_red(root)) then
+          done = .true.
+        else if (is_red(new_root)) then
+          new_root%red = .false.
+          done = .true.
         end if
+
+        removed_node => root
+        return
+      else
+        heir => root%left
+
+        do while (associated(heir%right))
+          heir => heir%right
+        end do
+
+        root%val = heir%val
+        val = heir%val
       end if
     end if
 
+    is_left = root%val < val
+
+    if (is_left) then
+      root%right => node_remove(root%right, removed_node, val, done)
+    else
+      root%left => node_remove(root%left, removed_node, val, done)
+    end if
+
+    if (.not. done) then
+      root => node_remove_balance(root, is_left, done)
+    end if
+
+    new_root => root
+
   end function node_remove
+
+  function node_remove_balance(root, is_left, done) &
+       result(parent)
+    type(redblack_node_t), pointer :: root
+    logical, intent(in) :: is_left
+    logical, intent(inout) :: done
+
+    ! type(redblack_node_t), pointer :: new_root
+
+    type(redblack_node_t), pointer :: parent, sibling, temp, nibling
+    logical :: save_colour
+
+    parent => root
+    if (is_left) then
+      sibling => root%right
+      nibling => sibling%left
+    else
+      sibling => root%left
+      nibling => sibling%right
+    end if
+
+    if (associated(sibling) .and. .not. is_red(sibling)) then
+      ! Black sibling cases
+      if (.not. is_red(sibling%left) &
+           .and. .not. is_red(sibling%right)) then
+        if (is_red(parent)) then
+          done = .true.
+        end if
+
+        parent%red = .false.
+        sibling%red = .true.
+      else
+        save_colour = root%red
+
+        if (is_left) then
+          temp => sibling%right
+        else
+          temp => sibling%left
+        end if
+
+        if (is_red(temp)) then
+          parent => single_rotate(parent, is_left)
+        else
+          parent => double_rotate(parent, is_left)
+        end if
+
+        parent%red = save_colour
+        parent%left%red = .false.
+        parent%right%red = .false.
+        done = .true.
+      end if
+
+    else if (associated(nibling)) then
+      ! Red sibling cases
+
+      if (.not. is_red(nibling%left) &
+           .and. .not. is_red(nibling%right)) then
+
+        parent => single_rotate(parent, is_left)
+
+        if (is_left) then
+          parent%left%right%red = .true.
+        else
+          parent%right%left%red = .true.
+        end if
+      else
+        if (is_left) then
+          if (is_red(nibling%left)) then
+            sibling%left => single_rotate(nibling, .not. is_left)
+          end if
+        else
+          if (is_red(nibling%right)) then
+            sibling%right => single_rotate(nibling, .not. is_left)
+          end if
+        end if
+
+        parent => double_rotate(parent, is_left)
+
+        if (is_left) then
+          sibling%left%red = .false.
+          parent%right%red = .true.
+        else
+          sibling%right%red = .false.
+          parent%left%red = .true.
+        end if
+
+      end if
+
+      parent%red = .false.
+
+      if (is_left) then
+        parent%left%red = .false.
+      else
+        parent%right%red = .false.
+      end if
+
+      done = .true.
+
+    end if
+
+  end function node_remove_balance
 
 end module redblack_tree
