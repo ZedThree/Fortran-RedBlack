@@ -6,6 +6,118 @@ module test_redblack_tree
 contains
 
   @test
+  subroutine test_is_red()
+    type(redblack_node_t), pointer :: node
+
+    node => null()
+
+    @assertFalse(is_red(node))
+
+    allocate(node)
+
+    @assertTrue(is_red(node))
+
+    node%red = .false.
+
+    @assertFalse(is_red(node))
+
+    deallocate(node)
+  end subroutine test_is_red
+
+  @test
+  subroutine test_redblack_assert_count_blacks()
+    type(redblack_node_t), pointer :: a, b, c, d
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    a%red = .false.
+
+    @assertEqual(2, redblack_assert(a))
+
+    b%left => a
+    a%red = .true.
+    b%red = .false.
+
+    @assertEqual(2, redblack_assert(b))
+
+    b%right => c
+
+    @assertEqual(2, redblack_assert(b))
+
+    c%right => d
+
+    deallocate(a, b, c, d)
+  end subroutine test_redblack_assert_count_blacks
+
+  @test
+  subroutine test_redblack_assert_consecutive_reds()
+    type(redblack_node_t), pointer :: a, b, c, d
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    b%left => a
+    b%right => c
+    c%right => d
+
+    @assertEqual(RED_VIOLATION, redblack_assert(b))
+    deallocate(a, b, c, d)
+  end subroutine test_redblack_assert_consecutive_reds
+
+  @test
+  subroutine test_redblack_assert_bad_tree()
+    type(redblack_node_t), pointer :: a, b, c, d
+
+    allocate(a, b, c, d)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+
+    a%left => b
+    a%right => c
+    a%red = .false.
+    c%right => d
+    d%red = .false.
+
+    @assertEqual(TREE_VIOLATION, redblack_assert(a))
+    deallocate(a, b, c, d)
+  end subroutine test_redblack_assert_bad_tree
+
+  @test
+  subroutine test_redblack_assert_unbalanced()
+    type(redblack_node_t), pointer :: a, b, c, d, e
+
+    allocate(a, b, c, d, e)
+    a%val = 0
+    b%val = 1
+    c%val = 2
+    d%val = 3
+    e%val = 4
+
+    a%red = .false.
+    b%red = .true.
+    c%red = .false.
+    d%red = .false.
+    e%red = .false.
+
+    b%left => a
+    b%right => d
+    d%left => c
+    d%right => e
+
+    @assertEqual(BLACK_VIOLATION, redblack_assert(b))
+    deallocate(a, b, c, d)
+  end subroutine test_redblack_assert_unbalanced
+
+  @test
   subroutine test_single_rotate_left()
     type(redblack_node_t), pointer :: a, b, c, d, e
 
@@ -135,6 +247,8 @@ contains
     @assertTrue(associated(tree%root))
     @assertEqual(5, tree%root%val)
 
+    @assertFalse(is_red(tree%root))
+
     @assertEqual(1, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
   end subroutine test_add_node
@@ -151,6 +265,9 @@ contains
 
     @assertEqual(5, tree%root%val)
     @assertEqual(3, tree%root%left%val)
+
+    @assertFalse(is_red(tree%root))
+    @assertTrue(is_red(tree%root%left))
 
     @assertEqual(2, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
@@ -169,6 +286,9 @@ contains
     @assertEqual(5, tree%root%val)
     @assertEqual(7, tree%root%right%val)
 
+    @assertFalse(is_red(tree%root))
+    @assertTrue(is_red(tree%root%right))
+
     @assertEqual(2, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
   end subroutine test_add_two_nodes_right
@@ -178,8 +298,11 @@ contains
     type(redblack_tree_t) :: tree
 
     call tree_add(tree, 5)
+    call pretty_print_tree(tree)
     call tree_add(tree, 3)
+    call pretty_print_tree(tree)
     call tree_add(tree, 7)
+    call pretty_print_tree(tree)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%left))
@@ -188,6 +311,10 @@ contains
     @assertEqual(5, tree%root%val)
     @assertEqual(3, tree%root%left%val)
     @assertEqual(7, tree%root%right%val)
+
+    @assertFalse(is_red(tree%root))
+    @assertTrue(is_red(tree%root%left))
+    @assertTrue(is_red(tree%root%right))
 
     @assertEqual(3, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
@@ -305,7 +432,11 @@ contains
     call tree_add(tree, 6)
     call tree_add(tree, 8)
 
+    call pretty_print_tree(tree)
+
     removed = tree_remove(tree, 5)
+
+    call pretty_print_tree(tree)
 
     vals = get_values_tree(tree)
 

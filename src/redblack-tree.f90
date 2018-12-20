@@ -17,6 +17,10 @@ module redblack_tree
     final :: delete_tree
   end type redblack_tree_t
 
+  integer, parameter :: RED_VIOLATION = -1
+  integer, parameter :: BLACK_VIOLATION = -2
+  integer, parameter :: TREE_VIOLATION = -3
+
 contains
 
   function is_red(root)
@@ -62,6 +66,27 @@ contains
 
   end function double_rotate
 
+  function redblack_assert_error_message(error) result(message)
+    integer, intent(in) :: error
+    character(len=:), allocatable :: message
+
+    if (error >= 0) then
+      message = "No error"
+      return
+    end if
+
+    select case(error)
+    case(RED_VIOLATION)
+      message = "Red violation"
+    case(BLACK_VIOLATION)
+      message = "Black violation"
+    case(TREE_VIOLATION)
+      message = "Binary tree violation"
+    case default
+      message = "Unknown error!"
+    end select
+  end function redblack_assert_error_message
+
   recursive function redblack_assert(root) result(black_count)
     type(redblack_node_t), pointer :: root
     integer :: black_count
@@ -80,7 +105,7 @@ contains
     ! Consecutive red links
     if (is_red(root)) then
       if (is_red(root%left) .or. is_red(root%right)) then
-        print*, "Red violation"
+        black_count = RED_VIOLATION
         return
       end if
     end if
@@ -91,13 +116,13 @@ contains
     ! Invalid binary search tree
     if (associated(root%left)) then
       if (root%left%val >= root%val) then
-        print*, "Binary tree violation"
+        black_count = TREE_VIOLATION
         return
       end if
     end if
     if (associated(root%right)) then
       if (root%right%val <= root%val) then
-        print*, "Binary tree violation"
+        black_count = TREE_VIOLATION
         return
       end if
     end if
@@ -105,12 +130,12 @@ contains
     ! Black height mismatch
     if (left_hand /= 0 .and. right_hand /= 0&
          & .and. left_hand /= right_hand) then
-      print*, "Black violation"
+      black_count = BLACK_VIOLATION
       return
     end if
 
     ! Only count black lines
-    if (left_hand /= 0 .and. right_hand /= 0) then
+    if (left_hand > 0 .and. right_hand > 0) then
       if (is_red(root)) then
         black_count = left_hand
       else
@@ -142,6 +167,8 @@ contains
       node%red = .true.
       return
     end if
+
+    if (val == node%val) return
 
     if (val < node%val) then
       call tree_add_at_node(node%left, val)
@@ -272,7 +299,10 @@ contains
       return
     end if
 
+    print*, ""
+    print*, "------------------------------"
     call pretty_print_node(this%root, 1)
+    print*, "------------------------------"
   end subroutine pretty_print_tree
 
   recursive subroutine pretty_print_node(node, depth)
@@ -430,26 +460,35 @@ contains
   end function node_remove
 
   function node_remove_balance(root, is_left, done) &
-       result(parent)
+       result(new_root)
     type(redblack_node_t), pointer :: root
     logical, intent(in) :: is_left
     logical, intent(inout) :: done
 
-    ! type(redblack_node_t), pointer :: new_root
+    type(redblack_node_t), pointer :: new_root
 
-    type(redblack_node_t), pointer :: parent, sibling, temp, nibling
-    logical :: save_colour
+    type(redblack_node_t), pointer :: parent, sibling, temp
+    logical :: save_colour, is_new_root
 
     parent => root
     if (is_left) then
       sibling => root%right
-      nibling => sibling%left
     else
       sibling => root%left
-      nibling => sibling%right
     end if
 
-    if (associated(sibling) .and. .not. is_red(sibling)) then
+    ! Reduce red sibling case to black sibling case
+    if (is_red(sibling)) then
+      root => single_rotate(root, is_left)
+
+      if (is_left) then
+        sibling => parent%right
+      else
+        sibling => parent%left
+      end if
+    end if
+
+    if (associated(sibling)) then
       ! Black sibling cases
       if (.not. is_red(sibling%left) &
            .and. .not. is_red(sibling%right)) then
@@ -460,7 +499,8 @@ contains
         parent%red = .false.
         sibling%red = .true.
       else
-        save_colour = root%red
+        save_colour = parent%red
+        is_new_root = associated(root, target=parent)
 
         if (is_left) then
           temp => sibling%right
@@ -477,56 +517,22 @@ contains
         parent%red = save_colour
         parent%left%red = .false.
         parent%right%red = .false.
+
+        if (is_new_root) then
+          root => parent
+        else
+          if (is_left) then
+            root%left => parent
+          else
+            root%right => parent
+          end if
+        end if
+
         done = .true.
       end if
-
-    else if (associated(nibling)) then
-      ! Red sibling cases
-
-      if (.not. is_red(nibling%left) &
-           .and. .not. is_red(nibling%right)) then
-
-        parent => single_rotate(parent, is_left)
-
-        if (is_left) then
-          parent%left%right%red = .true.
-        else
-          parent%right%left%red = .true.
-        end if
-      else
-        if (is_left) then
-          if (is_red(nibling%left)) then
-            sibling%left => single_rotate(nibling, .not. is_left)
-          end if
-        else
-          if (is_red(nibling%right)) then
-            sibling%right => single_rotate(nibling, .not. is_left)
-          end if
-        end if
-
-        parent => double_rotate(parent, is_left)
-
-        if (is_left) then
-          sibling%left%red = .false.
-          parent%right%red = .true.
-        else
-          sibling%right%red = .false.
-          parent%left%red = .true.
-        end if
-
-      end if
-
-      parent%red = .false.
-
-      if (is_left) then
-        parent%left%red = .false.
-      else
-        parent%right%red = .false.
-      end if
-
-      done = .true.
-
     end if
+
+    new_root => root
 
   end function node_remove_balance
 
