@@ -164,6 +164,9 @@ contains
 
     type(redblack_node_t), pointer :: node_dir, node_antidir
     type(redblack_node_t), pointer :: node_dir_dir, node_dir_antidir
+    logical :: is_left
+
+    logical :: new_dir
 
     if (.not. associated(node)) then
       allocate(node)
@@ -174,14 +177,20 @@ contains
 
     if (val == node%val) return
 
-    if (val < node%val) then
+    is_left = (val < node%val)
+
+    if (is_left) then
       call tree_add_at_node(node%left, val)
       node_dir => node%left
       node_antidir => node%right
+      node_dir_dir => node_dir%left
+      node_dir_antidir => node_dir%right
     else
       call tree_add_at_node(node%right, val)
       node_dir => node%right
       node_antidir => node%left
+      node_dir_dir => node_dir%right
+      node_dir_antidir => node_dir%left
     end if
 
     ! Check for violations
@@ -189,34 +198,21 @@ contains
       if (is_red(node_antidir)) then
         ! Simple case, red siblings
 
-        ! Check node from the direction the new node was inserted
-        if (val < node_dir%val) then
-          node_dir_dir => node_dir%left
-        else
-          node_dir_dir => node_dir%right
-        end if
-
-        ! Fix violation
-        if (is_red(node_dir_dir)) then
+        if (is_red(node_dir_dir) .or. is_red(node_dir_antidir)) then
           node%colour = RED
           node%left%colour = BLACK
           node%right%colour = BLACK
         end if
 
       else
-        if (val < node%val) then
-          if (is_red(node_dir%left)) then
-            node => single_rotate(node, is_left=.false.)
-          else if (is_red(node_dir%right)) then
-            node => single_rotate(node, is_left=.false.)
-          end if
-        else
-          if (is_red(node_dir%right)) then
-            node => single_rotate(node, is_left=.true.)
-          else if (is_red(node_dir%right)) then
-            node => double_rotate(node, is_left=.true.)
-          end if
+        ! More complicated violations
+
+        if (is_red(node_dir_dir)) then
+          node => single_rotate(node, .not. is_left)
+        else if (is_red(node_dir_antidir)) then
+          node => double_rotate(node, .not. is_left)
         end if
+
       end if
     end if
 
