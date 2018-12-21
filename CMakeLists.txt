@@ -29,15 +29,14 @@ target_link_libraries(simple_test_redblack_tree PUBLIC rbtree)
 target_include_directories(simple_test_redblack_tree
   PUBLIC $<TARGET_PROPERTY:rbtree,Fortran_MODULE_DIRECTORY>)
 
-include(CTest)
-
-enable_testing()
-set(TEST_SOURCES
-  tests/test_binary_tree.pf
-  tests/test_redblack_tree.pf
-  )
-
-include(cmake/FindpFUnit.cmake)
 find_package(pFUnit)
-add_pfunit_test(rb_tests "${TEST_SOURCES}" "" "")
-target_link_libraries(rb_tests rbtree)
+if(PFUNIT_FOUND)
+  include(CTest)
+  enable_testing()
+  set(TEST_SOURCES
+    tests/test_binary_tree.pf
+    tests/test_redblack_tree.pf
+    )
+  add_pfunit_test(rb_tests "${TEST_SOURCES}" "" "")
+  target_link_libraries(rb_tests rbtree)
+endif()
