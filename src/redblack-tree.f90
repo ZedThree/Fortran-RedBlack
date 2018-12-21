@@ -26,38 +26,47 @@ module redblack_tree
 
 contains
 
-  function is_red(root)
-    type(redblack_node_t), pointer :: root
+  function is_red(node)
+    !! Returns true if node has been allocated and is red
+    type(redblack_node_t), pointer :: node !! The node to check
     logical :: is_red
 
     is_red = .false.
-    if (associated(root)) is_red = (root%colour .eqv. RED)
+    if (associated(node)) is_red = (node%colour .eqv. RED)
   end function is_red
 
-  function single_rotate(root, is_left) result(old)
+  function single_rotate(root, is_left) result(new_root)
+    !! Rotate subtree at root and recolour
     type(redblack_node_t), pointer :: root
+        !! The start of the subtree
     logical, intent(in) :: is_left
-    type(redblack_node_t), pointer :: old
+        !! If true, rotate to left; otherwise to the right
+    type(redblack_node_t), pointer :: new_root
+        !! The new root of the subtree
 
     if (is_left) then
-      old => root%right
-      root%right => old%left
-      old%left => root
+      new_root => root%right
+      root%right => new_root%left
+      new_root%left => root
     else
-      old => root%left
-      root%left => old%right
-      old%right => root
+      new_root => root%left
+      root%left => new_root%right
+      new_root%right => root
     end if
 
     root%colour = RED
-    old%colour = BLACK
+    new_root%colour = BLACK
 
   end function single_rotate
 
-  function double_rotate(root, is_left) result(old)
+  function double_rotate(root, is_left) result(new_root)
+    !! Rotate twice: first about a child, then at root
     type(redblack_node_t), pointer :: root
+        !! The start of the subtree
     logical, intent(in) :: is_left
-    type(redblack_node_t), pointer :: old
+        !! If true, rotate to left; otherwise to the right
+    type(redblack_node_t), pointer :: new_root
+        !! The new root of the subtree
 
     if (is_left) then
       root%right => single_rotate(root%right, .false.)
@@ -65,12 +74,14 @@ contains
       root%left => single_rotate(root%left, .true.)
     end if
 
-    old => single_rotate(root, is_left)
+    new_root => single_rotate(root, is_left)
 
   end function double_rotate
 
   function redblack_assert_error_message(error) result(message)
-    integer, intent(in) :: error
+    !! Convert the error code from redblack_assert to a readable
+    !! message
+    integer, intent(in) :: error !! The error code from redblack_assert
     character(len=:), allocatable :: message
 
     if (error >= 0) then
@@ -90,9 +101,26 @@ contains
     end select
   end function redblack_assert_error_message
 
-  recursive function redblack_assert(root) result(black_count)
-    type(redblack_node_t), pointer :: root
+  function tree_redblack_assert(this) result(black_count)
+    !! Recurse down the tree checking the red-black properties all
+    !! hold
+    class(redblack_tree_t), intent(in) :: this
+        !! The tree to check
     integer :: black_count
+        !! The black level of the subtree or a negative value if one
+        !! of the properties has been violated
+
+    black_count = redblack_assert(this%root)
+  end function tree_redblack_assert
+
+  recursive function redblack_assert(root) result(black_count)
+    !! Recurse down the subtree checking the red-black properties all
+    !! hold
+    type(redblack_node_t), pointer :: root
+        !! Root of the subtree
+    integer :: black_count
+        !! The black level of the subtree or a negative value if one
+        !! of the properties has been violated
 
     integer :: left_hand, right_hand
 
@@ -101,6 +129,7 @@ contains
     right_hand = 0
 
     if (.not. associated(root)) then
+      ! Leaves are all black
       black_count = 1
       return
     end if
@@ -137,7 +166,7 @@ contains
       return
     end if
 
-    ! Only count black lines
+    ! All good, count black lines
     if (left_hand > 0 .and. right_hand > 0) then
       if (is_red(root)) then
         black_count = left_hand
@@ -149,6 +178,7 @@ contains
   end function redblack_assert
 
   subroutine tree_add(this, val)
+    !! Add a value to the tree
     class(redblack_tree_t), intent(inout) :: this
     integer, intent(in) :: val
 
@@ -159,6 +189,7 @@ contains
   end subroutine tree_add
 
   recursive subroutine tree_add_at_node(node, val)
+    !! Add a value to the subtree
     type(redblack_node_t), pointer :: node
     integer, intent(in) :: val
 
