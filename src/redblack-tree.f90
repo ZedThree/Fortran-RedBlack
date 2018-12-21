@@ -401,6 +401,7 @@ contains
     end if
 
     data = val
+    done = .false.
     this%root => node_remove(this%root, removed_node, data, done)
 
     if (associated(removed_node)) then
