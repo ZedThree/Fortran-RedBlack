@@ -197,8 +197,6 @@ contains
     type(redblack_node_t), pointer :: node_dir_dir, node_dir_antidir
     logical :: is_left
 
-    logical :: new_dir
-
     if (.not. associated(node)) then
       allocate(node)
       node%val = val
