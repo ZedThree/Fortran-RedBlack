@@ -327,7 +327,8 @@ contains
     integer, intent(in) :: depth
 
     character(len=5) :: red_or_black
-    character(len=22) :: depth_format
+
+    integer :: i
 
     if (associated(node%right)) then
       call pretty_print_node(node%right, depth + 1)
@@ -339,10 +340,11 @@ contains
       red_or_black = "black"
     end if
 
-    write(depth_format, '(a, i0, a)') "(", depth,&
-         & '("  "), i0, a, a, a)'
+    do i = 0, depth
+      write(*, '(a)', advance='no') " "
+    end do
 
-    write(*, trim(depth_format)) node%val, " (", trim(red_or_black), ") "
+    write(*, '(i0, a, a, a)') node%val, " (", trim(red_or_black), ") "
 
     if (associated(node%left)) then
       call pretty_print_node(node%left, depth + 1)
