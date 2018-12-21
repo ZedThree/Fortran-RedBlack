@@ -160,6 +160,7 @@ contains
     integer, intent(in) :: val
 
     type(redblack_node_t), pointer :: node_dir, node_antidir
+    type(redblack_node_t), pointer :: node_dir_dir, node_dir_antidir
 
     if (.not. associated(node)) then
       allocate(node)
@@ -183,9 +184,22 @@ contains
     ! Check for violations
     if (is_red(node_dir)) then
       if (is_red(node_antidir)) then
-        node%red = .true.
-        node%left%red = .false.
-        node%right%red = .false.
+        ! Simple case, red siblings
+
+        ! Check node from the direction the new node was inserted
+        if (val < node_dir%val) then
+          node_dir_dir => node_dir%left
+        else
+          node_dir_dir => node_dir%right
+        end if
+
+        ! Fix violation
+        if (is_red(node_dir_dir)) then
+          node%colour = RED
+          node%left%colour = BLACK
+          node%right%colour = BLACK
+        end if
+
       else
         if (val < node%val) then
           if (is_red(node_dir%left)) then
