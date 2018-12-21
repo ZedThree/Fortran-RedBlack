@@ -17,7 +17,7 @@ contains
 
     @assertTrue(is_red(node))
 
-    node%red = .false.
+    node%colour = BLACK
 
     @assertFalse(is_red(node))
 
@@ -34,13 +34,13 @@ contains
     c%val = 2
     d%val = 3
 
-    a%red = .false.
+    a%colour = BLACK
 
     @assertEqual(2, redblack_assert(a))
 
     b%left => a
-    a%red = .true.
-    b%red = .false.
+    a%colour = RED
+    b%colour = BLACK
 
     @assertEqual(2, redblack_assert(b))
 
@@ -83,9 +83,9 @@ contains
 
     a%left => b
     a%right => c
-    a%red = .false.
+    a%colour = BLACK
     c%right => d
-    d%red = .false.
+    d%colour = BLACK
 
     @assertEqual(TREE_VIOLATION, redblack_assert(a))
     deallocate(a, b, c, d)
@@ -102,11 +102,11 @@ contains
     d%val = 3
     e%val = 4
 
-    a%red = .false.
-    b%red = .true.
-    c%red = .false.
-    d%red = .false.
-    e%red = .false.
+    a%colour = BLACK
+    b%colour = RED
+    c%colour = BLACK
+    d%colour = BLACK
+    e%colour = BLACK
 
     b%left => a
     b%right => d

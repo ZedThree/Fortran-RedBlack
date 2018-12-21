@@ -2,10 +2,13 @@ module redblack_tree
 
   implicit none
 
+  logical, parameter :: RED = .true.
+  logical, parameter :: BLACK = .false.
+
   type :: redblack_node_t
     type(redblack_node_t), pointer :: left => null()
     type(redblack_node_t), pointer :: right => null()
-    logical :: red = .true.
+    logical :: colour = RED
 
     integer :: val
   end type redblack_node_t
@@ -28,7 +31,7 @@ contains
     logical :: is_red
 
     is_red = .false.
-    if (associated(root)) is_red = root%red
+    if (associated(root)) is_red = (root%colour .eqv. RED)
   end function is_red
 
   function single_rotate(root, is_left) result(old)
@@ -46,8 +49,8 @@ contains
       old%right => root
     end if
 
-    root%red = .true.
-    old%red = .false.
+    root%colour = RED
+    old%colour = BLACK
 
   end function single_rotate
 
@@ -150,7 +153,7 @@ contains
     integer, intent(in) :: val
 
     call tree_add_at_node(this%root, val)
-    this%root%red = .false.
+    this%root%colour = BLACK
 
     this%size = this%size + 1
   end subroutine tree_add
@@ -165,7 +168,7 @@ contains
     if (.not. associated(node)) then
       allocate(node)
       node%val = val
-      node%red = .true.
+      node%colour = RED
       return
     end if
 
@@ -330,7 +333,7 @@ contains
       call pretty_print_node(node%right, depth + 1)
     end if
 
-    if (node%red) then
+    if (node%colour .eqv. RED) then
       red_or_black = "red"
     else
       red_or_black = "black"
@@ -439,7 +442,7 @@ contains
         if (is_red(root)) then
           done = .true.
         else if (is_red(new_root)) then
-          new_root%red = .false.
+          new_root%colour = BLACK
           done = .true.
         end if
 
@@ -510,10 +513,10 @@ contains
           done = .true.
         end if
 
-        parent%red = .false.
-        sibling%red = .true.
+        parent%colour = BLACK
+        sibling%colour = RED
       else
-        save_colour = parent%red
+        save_colour = parent%colour
         is_new_root = associated(root, target=parent)
 
         if (is_left) then
@@ -528,9 +531,9 @@ contains
           parent => double_rotate(parent, is_left)
         end if
 
-        parent%red = save_colour
-        parent%left%red = .false.
-        parent%right%red = .false.
+        parent%colour = save_colour
+        parent%left%colour = BLACK
+        parent%right%colour = BLACK
 
         if (is_new_root) then
           root => parent
