@@ -298,11 +298,8 @@ contains
     type(redblack_tree_t) :: tree
 
     call tree_add(tree, 5)
-    call pretty_print_tree(tree)
     call tree_add(tree, 3)
-    call pretty_print_tree(tree)
     call tree_add(tree, 7)
-    call pretty_print_tree(tree)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%left))
@@ -432,11 +429,7 @@ contains
     call tree_add(tree, 6)
     call tree_add(tree, 8)
 
-    call pretty_print_tree(tree)
-
     removed = tree_remove(tree, 5)
-
-    call pretty_print_tree(tree)
 
     vals = get_values_tree(tree)
 
@@ -446,6 +439,47 @@ contains
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
   end subroutine test_remove_root
+
+  @test
+  subroutine test_remove_left_value_1deep()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+
+    removed = tree_remove(tree, 3)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(1, size(vals))
+    @assertEqual([5], vals)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+
+  end subroutine test_remove_left_value_1deep
+
+  @test
+  subroutine test_remove_left_value_2deep()
+    type(redblack_tree_t) :: tree
+    integer, allocatable :: vals(:)
+    logical :: removed
+
+    call tree_add(tree, 5)
+    call tree_add(tree, 3)
+    call tree_add(tree, 7)
+
+    removed = tree_remove(tree, 3)
+
+    vals = get_values_tree(tree)
+
+    @assertTrue(removed)
+    @assertEqual(2, size(vals))
+    @assertEqual([5, 7], vals)
+    @assertGreaterThan(redblack_assert(tree%root), 0)
+
+  end subroutine test_remove_left_value_2deep
 
   @test
   subroutine test_remove_left_value()
