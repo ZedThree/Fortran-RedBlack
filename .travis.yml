@@ -6,7 +6,6 @@ addons:
     packages:
       - gfortran
 before_install:
-  - git submoulde update --init --recursive
   - mkdir -p externals/build_pfunit; cd externals/build_pfunit
   - cmake ../pFUnit/ -DMPI=NO -DOPENMP=NO -DCMAKE_INSTALL_PREFIX=../install_pfunit
   - make && make install
