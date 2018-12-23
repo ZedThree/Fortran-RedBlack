@@ -1,0 +1,15 @@
+language: c
+compiler: gcc
+addons:
+  apt:
+    update: true
+    packages:
+      - gfortran
+before_install:
+  - git submoulde update --init --recursive
+  - mkdir -p externals/build_pfunit; cd externals/build_pfunit
+  - cmake ../pFUnit/ -DMPI=NO -DOPENMP=NO -DCMAKE_INSTALL_PREFIX=../install_pfunit
+  - make && make install
+  - cd ../../
+script:
+  - mkdir build; cd build; cmake ..  -DCMAKE_PREFIX_PATH=$(pwd)/../externals/install_pfunit/ && make && ctest --verbose
