@@ -3,12 +3,14 @@ compiler: gcc
 addons:
   apt:
     update: true
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - gfortran
+      - gfortran-7
 before_install:
   - mkdir -p externals/build_pfunit; cd externals/build_pfunit
-  - cmake ../pFUnit/ -DMPI=NO -DOPENMP=NO -DCMAKE_INSTALL_PREFIX=../install_pfunit
+  - cmake ../pFUnit/ -DMPI=NO -DOPENMP=NO -DCMAKE_INSTALL_PREFIX=../install_pfunit -DCMAKE_Fortran_COMPILER=gfortran-7
   - make && make install
   - cd ../../
 script:
-  - mkdir build; cd build; cmake ..  -DCMAKE_PREFIX_PATH=$(pwd)/../externals/install_pfunit/ && make && ctest --verbose
+  - mkdir build; cd build; cmake ..  -DCMAKE_PREFIX_PATH=$(pwd)/../externals/install_pfunit/ -DCMAKE_Fortran_COMPILER=gfortran-7 && make && ctest --verbose
