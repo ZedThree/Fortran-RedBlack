@@ -30,6 +30,8 @@ module redblack_tree
     procedure :: print => tree_print
     procedure :: remove => tree_remove
     procedure :: values => tree_get_values
+    procedure :: copy => tree_copy
+    generic :: assignment(=) => copy
     final :: delete_tree
   end type redblack_tree_t
 
@@ -593,5 +595,34 @@ contains
     new_root => root
 
   end function node_remove_balance
+
+  subroutine tree_copy(lhs, rhs)
+    class(redblack_tree_t), intent(inout) :: lhs
+    class(redblack_tree_t), intent(in) :: rhs
+
+    ! Probably don't need this, but not clear if gfortran finalises
+    ! lhs of assignment yet
+    call delete_tree(lhs)
+
+    lhs%size = rhs%size
+    lhs%root => node_copy(rhs%root)
+  end subroutine tree_copy
+
+  recursive function node_copy(rhs) result(lhs)
+    type(redblack_node_t), pointer :: lhs
+    type(redblack_node_t), pointer :: rhs
+
+    if (.not. associated(rhs)) then
+      lhs => null()
+      return
+    end if
+
+    allocate(lhs, source=rhs)
+
+    lhs%val = rhs%val
+
+    lhs%left => node_copy(rhs%left)
+    lhs%right => node_copy(rhs%right)
+  end function node_copy
 
 end module redblack_tree

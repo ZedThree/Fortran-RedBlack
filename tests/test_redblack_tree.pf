@@ -651,4 +651,50 @@ contains
 
   end subroutine test_remove_last_value
 
+  @test
+  subroutine test_copy()
+    type(redblack_tree_t) :: tree, tree_copy
+    integer, allocatable :: vals(:)
+
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
+
+    call tree_copy%copy(tree)
+
+    vals = tree_copy%values()
+
+    @assertEqual(7, size(vals))
+    @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
+    @assertGreaterThan(redblack_assert(tree_copy%root), 0)
+
+  end subroutine test_copy
+
+  @test
+  subroutine test_assignment()
+    type(redblack_tree_t) :: tree, tree_copy
+    integer, allocatable :: vals(:)
+
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
+
+    tree_copy = tree
+
+    vals = tree_copy%values()
+
+    @assertEqual(7, size(vals))
+    @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
+    @assertGreaterThan(redblack_assert(tree_copy%root), 0)
+
+  end subroutine test_assignment
+
 end module test_redblack_tree
