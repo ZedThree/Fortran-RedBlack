@@ -31,7 +31,9 @@ module redblack_tree
     procedure :: remove => tree_remove
     procedure :: values => tree_get_values
     procedure :: copy => tree_copy
+    procedure :: equals => tree_equality
     generic :: assignment(=) => copy
+    generic :: operator(==) => equals
     final :: delete_tree
   end type redblack_tree_t
 
@@ -624,5 +626,12 @@ contains
     lhs%left => node_copy(rhs%left)
     lhs%right => node_copy(rhs%right)
   end function node_copy
+
+  function tree_equality(lhs, rhs) result(equal)
+    class(redblack_tree_t), intent(in) :: lhs, rhs
+    logical :: equal
+    ! Could be more efficient
+    equal = all(lhs%values() == rhs%values())
+  end function tree_equality
 
 end module redblack_tree

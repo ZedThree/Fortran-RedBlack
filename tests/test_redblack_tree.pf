@@ -697,4 +697,30 @@ contains
 
   end subroutine test_assignment
 
+  @test
+  subroutine test_equality()
+    type(redblack_tree_t) :: tree1, tree2, tree3
+
+    call tree1%add(5)
+    call tree1%add(3)
+    call tree1%add(7)
+    call tree1%add(2)
+    call tree1%add(4)
+    call tree1%add(6)
+    call tree1%add(8)
+
+    call tree2%add(2)
+    call tree2%add(3)
+    call tree2%add(4)
+    call tree2%add(5)
+    call tree2%add(6)
+    call tree2%add(7)
+    call tree2%add(8)
+
+    call tree3%add(5)
+
+    @assertTrue(tree1 == tree2)
+    @assertFalse(tree3 == tree1)
+  end subroutine test_equality
+
 end module test_redblack_tree
