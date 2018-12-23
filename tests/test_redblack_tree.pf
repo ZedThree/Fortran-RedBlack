@@ -114,7 +114,7 @@ contains
     d%right => e
 
     @assertEqual(BLACK_VIOLATION, redblack_assert(b))
-    deallocate(a, b, c, d)
+    deallocate(a, b, c, d, e)
   end subroutine test_redblack_assert_unbalanced
 
   @test
@@ -242,7 +242,7 @@ contains
   subroutine test_add_node()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 5)
+    call tree%add(5)
 
     @assertTrue(associated(tree%root))
     @assertEqual(5, tree%root%val)
@@ -257,8 +257,8 @@ contains
   subroutine test_add_two_nodes_left()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
+    call tree%add(5)
+    call tree%add(3)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%left))
@@ -277,8 +277,8 @@ contains
   subroutine test_add_two_nodes_right()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 7)
+    call tree%add(5)
+    call tree%add(7)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%right))
@@ -297,9 +297,9 @@ contains
   subroutine test_add_three_nodes()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%left))
@@ -321,13 +321,13 @@ contains
   subroutine test_add_six_nodes()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
     @assertTrue(associated(tree%root))
     @assertTrue(associated(tree%root%left))
@@ -353,18 +353,18 @@ contains
   subroutine test_add_in_order()
     type(redblack_tree_t) :: tree
 
-    call tree_add(tree, 0)
-    call tree_add(tree, 1)
-    call tree_add(tree, 2)
-    call tree_add(tree, 3)
-    call tree_add(tree, 4)
-    call tree_add(tree, 5)
-    call tree_add(tree, 6)
-    call tree_add(tree, 7)
-    call tree_add(tree, 8)
-    call tree_add(tree, 9)
-    call tree_add(tree, 10)
-    call tree_add(tree, 11)
+    call tree%add(0)
+    call tree%add(1)
+    call tree%add(2)
+    call tree%add(3)
+    call tree%add(4)
+    call tree%add(5)
+    call tree%add(6)
+    call tree%add(7)
+    call tree%add(8)
+    call tree%add(9)
+    call tree%add(10)
+    call tree%add(11)
 
     @assertEqual(12, tree%size)
     @assertGreaterThan(redblack_assert(tree%root), 0)
@@ -375,20 +375,20 @@ contains
     type(redblack_tree_t) :: tree
     type(redblack_node_t), pointer :: found
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    found => find(tree, 5)
+    found => tree%find(5)
 
     @assertTrue(associated(found))
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    found => find(tree, 1)
+    found => tree%find(1)
 
     @assertFalse(associated(found))
     @assertGreaterThan(redblack_assert(tree%root), 0)
@@ -399,15 +399,15 @@ contains
     type(redblack_tree_t) :: tree
     integer, allocatable :: vals(:)
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertEqual(7, size(vals))
     @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
@@ -421,17 +421,17 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 5)
+    removed = tree%remove(5)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(6, size(vals))
@@ -446,12 +446,12 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
+    call tree%add(5)
+    call tree%add(3)
 
-    removed = tree_remove(tree, 3)
+    removed = tree%remove(3)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(1, size(vals))
@@ -466,13 +466,13 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
 
-    removed = tree_remove(tree, 3)
+    removed = tree%remove(3)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(2, size(vals))
@@ -487,17 +487,17 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 2)
+    removed = tree%remove(2)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(6, size(vals))
@@ -512,17 +512,17 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 8)
+    removed = tree%remove(8)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(6, size(vals))
@@ -537,17 +537,17 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 3)
+    removed = tree%remove(3)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertTrue(removed)
     @assertEqual(6, size(vals))
@@ -562,23 +562,23 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 3)
+    removed = tree%remove(3)
     @assertTrue(removed)
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    removed = tree_remove(tree, 7)
+    removed = tree%remove(7)
     @assertTrue(removed)
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertEqual(5, size(vals))
     @assertEqual([2, 4, 5, 6, 8], vals)
@@ -592,20 +592,20 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 7)
-    call tree_add(tree, 2)
-    call tree_add(tree, 4)
-    call tree_add(tree, 6)
-    call tree_add(tree, 8)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(7)
+    call tree%add(2)
+    call tree%add(4)
+    call tree%add(6)
+    call tree%add(8)
 
-    removed = tree_remove(tree, 0)
+    removed = tree%remove(0)
 
     @assertFalse(removed)
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertEqual(7, size(vals))
     @assertEqual([2, 3, 4, 5, 6, 7, 8], vals)
@@ -619,11 +619,11 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    removed = tree_remove(tree, 6)
+    removed = tree%remove(6)
     @assertFalse(removed)
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertEqual(0, size(vals))
     @assertEqual([integer::], vals)
@@ -637,13 +637,13 @@ contains
     integer, allocatable :: vals(:)
     logical :: removed
 
-    call tree_add(tree, 5)
+    call tree%add(5)
 
-    removed = tree_remove(tree, 5)
+    removed = tree%remove(5)
     @assertTrue(removed)
     @assertGreaterThan(redblack_assert(tree%root), 0)
 
-    vals = get_values_tree(tree)
+    vals = tree%values()
 
     @assertEqual(0, size(vals))
     @assertEqual([integer::], vals)

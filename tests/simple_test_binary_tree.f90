@@ -9,11 +9,11 @@ program simple_test_binary_tree
     print*, "--------------------"
     print*, " Binary tree"
 
-    call tree_add(tree, 4)
-    call tree_add(tree, 5)
-    call tree_add(tree, 3)
-    call tree_add(tree, 2)
-    call tree_add(tree, 1)
+    call tree%add(4)
+    call tree%add(5)
+    call tree%add(3)
+    call tree%add(2)
+    call tree%add(1)
 
     if (associated(tree%root)) then
       print*, tree%root%val
@@ -22,10 +22,10 @@ program simple_test_binary_tree
     end if
 
     write(*, '(a)', advance='no') "print_tree: "
-    call print_tree(tree)
+    call tree%print()
 
     write(*, '(a)', advance='no') "get_values_tree: "
-    vals = get_values_tree(tree)
+    vals = tree%values()
     print*, vals
   end block
 

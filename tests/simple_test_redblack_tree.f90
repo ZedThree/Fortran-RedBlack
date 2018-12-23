@@ -9,39 +9,39 @@ program simple_test_redblack_tree
     print*, "--------------------"
     print*, " Redblack tree"
 
-    call tree_add(tree, 0)
+    call tree%add(0)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 1)
+    call tree%add(1)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 2)
+    call tree%add(2)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 3)
+    call tree%add(3)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 4)
+    call tree%add(4)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 5)
+    call tree%add(5)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 6)
+    call tree%add(6)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 7)
+    call tree%add(7)
     call pretty_print_tree(tree)
     print*, ""
-    call tree_add(tree, 8)
+    call tree%add(8)
     call pretty_print_tree(tree)
     print*, ""
 
     write(*, '(a)', advance='no') "print_tree: "
-    call print_tree(tree)
+    call tree%print()
 
     write(*, '(a)', advance='no') "get_values_tree: "
-    vals = get_values_tree(tree)
+    vals = tree%values()
     print*, vals
 
   end block

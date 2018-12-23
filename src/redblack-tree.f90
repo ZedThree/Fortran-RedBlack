@@ -2,6 +2,14 @@ module redblack_tree
 
   implicit none
 
+  private
+  public :: redblack_node_t, redblack_tree_t
+  public :: is_red, redblack_assert
+  public :: single_rotate, double_rotate
+  public :: pretty_print_tree
+  public :: RED, BLACK
+  public :: RED_VIOLATION, BLACK_VIOLATION, TREE_VIOLATION
+
   logical, parameter :: RED = .true.
   logical, parameter :: BLACK = .false.
 
@@ -17,6 +25,11 @@ module redblack_tree
     type(redblack_node_t), pointer :: root => null()
     integer :: size = 0
   contains
+    procedure :: add => tree_add
+    procedure :: find => tree_find
+    procedure :: print => tree_print
+    procedure :: remove => tree_remove
+    procedure :: values => tree_get_values
     final :: delete_tree
   end type redblack_tree_t
 
@@ -247,19 +260,19 @@ contains
 
   end subroutine tree_add_at_node
 
-  function find(this, val)
+  function tree_find(this, val)
     class(redblack_tree_t), intent(in) :: this
     integer, intent(in) :: val
-    type(redblack_node_t), pointer :: find
+    type(redblack_node_t), pointer :: tree_find
 
-    find => null()
+    tree_find => null()
 
     if (.not. associated(this%root)) then
       return
     end if
 
-    find => find_at_node(this%root, val)
-  end function find
+    tree_find => find_at_node(this%root, val)
+  end function tree_find
 
   recursive function find_at_node(node, val) result(found)
     type(redblack_node_t), pointer :: node
@@ -309,30 +322,30 @@ contains
     end if
   end subroutine delete_node
 
-  subroutine print_tree(this)
+  subroutine tree_print(this)
     class(redblack_tree_t), intent(in) :: this
 
     if (.not. associated(this%root)) then
       return
     end if
 
-    call print_node(this%root)
+    call node_print(this%root)
     print*, ""
-  end subroutine print_tree
+  end subroutine tree_print
 
-  recursive subroutine print_node(node)
+  recursive subroutine node_print(node)
     type(redblack_node_t), intent(in) :: node
 
     if (associated(node%left)) then
-      call print_node(node%left)
+      call node_print(node%left)
     end if
 
     write(*, '(i0, a)', advance='no') node%val, " "
 
     if (associated(node%right)) then
-      call print_node(node%right)
+      call node_print(node%right)
     end if
-  end subroutine print_node
+  end subroutine node_print
 
   subroutine pretty_print_tree(this)
     class(redblack_tree_t), intent(in) :: this
@@ -377,7 +390,7 @@ contains
 
   end subroutine pretty_print_node
 
-  function get_values_tree(this) result(vals)
+  function tree_get_values(this) result(vals)
     class(redblack_tree_t), intent(in) :: this
     integer, allocatable :: vals(:)
 
@@ -390,25 +403,25 @@ contains
     end if
 
     index = 0
-    call get_values_node(this%root, vals, index)
-  end function get_values_tree
+    call node_get_values(this%root, vals, index)
+  end function tree_get_values
 
-  recursive subroutine get_values_node(node, vals, index)
+  recursive subroutine node_get_values(node, vals, index)
     type(redblack_node_t), intent(in) :: node
     integer, allocatable, intent(inout) :: vals(:)
     integer, intent(inout) :: index
 
     if (associated(node%left)) then
-      call get_values_node(node%left, vals, index)
+      call node_get_values(node%left, vals, index)
     end if
 
     index = index + 1
     vals(index) = node%val
 
     if (associated(node%right)) then
-      call get_values_node(node%right, vals, index)
+      call node_get_values(node%right, vals, index)
     end if
-  end subroutine get_values_node
+  end subroutine node_get_values
 
   function tree_remove(this, val) result(removed)
     class(redblack_tree_t), intent(inout) :: this
